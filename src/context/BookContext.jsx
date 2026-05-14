@@ -1,81 +1,114 @@
-import React, { createContext, useEffect, useState } from 'react';
-import { toast } from 'react-toastify';
-import { addReadListToLocalDB, getAllReadListFromLocalDB } from '../utils/localDB';
+// context/BookProvider.jsx
 
+import React, { createContext, useState } from 'react';
+
+import { toast } from 'react-toastify';
+
+import {
+    addReadListToLocalDB,
+    getAllReadListFromLocalDB,
+    addWishListToLocalDB,
+    getAllWishListFromLocalDB
+} from '../utils/localDB';
 
 export const BookContext = createContext();
 
 const BookProvider = ({ children }) => {
 
+    // ================= STATES =================
 
-    const [readList, setReadList] = useState(() => getAllReadListFromLocalDB());
-    const [wishList, setWishList] = useState([]);
+    const [readList, setReadList] = useState(
+        () => getAllReadListFromLocalDB()
+    );
+
+    const [wishList, setWishList] = useState(
+        () => getAllWishListFromLocalDB()
+    );
 
 
-// useEffect(()=>{
-    
-//     const getReadListFromLocalDB=getAllReadListFromLocalDB()
-//     console.log(getReadListFromLocalDB,"getAllReadListFromLocalDB");
-//     setReadList(getReadListFromLocalDB)
-// },[]);
 
+    // ================= HANDLE READ LIST =================
 
     const handleMarkAsRead = (currentBook) => {
 
-
-        addReadListToLocalDB(currentBook);
-
-        const isExistedBook = readList.find((book) => book.bookId === currentBook.bookId)
+        const isExistedBook = readList.find(
+            (book) => book.bookId === currentBook.bookId
+        );
 
         if (isExistedBook) {
-            toast.error("the book is already read list");
+
+            toast.error("The book already exists in Read List");
         }
         else {
-            setReadList([...readList, currentBook]);
-            toast.success(`${currentBook.bookName} is added to read list`);
-        }
-        console.log(currentBook, readList, "book");
 
+            addReadListToLocalDB(currentBook);
+
+            setReadList([...readList, currentBook]);
+
+            toast.success(
+                `${currentBook.bookName} added to Read List`
+            );
+        }
     };
 
 
 
+    // ================= HANDLE WISH LIST =================
+
     const handleWishList = (currentBook) => {
 
-        const isExistedReadList=readList.find((book)=>book.bookId===currentBook.bookId);
+        // Check if already in read list
 
-        if(isExistedReadList){
-            toast.error("the book is already in read list");
+        const isExistedReadList = readList.find(
+            (book) => book.bookId === currentBook.bookId
+        );
+
+        if (isExistedReadList) {
+
+            toast.error("Book already exists in Read List");
+
             return;
         }
 
 
 
+        // Check if already in wish list
 
-        const isExistedBook = wishList.find((book) => book.bookId === currentBook.bookId);
+        const isExistedWishList = wishList.find(
+            (book) => book.bookId === currentBook.bookId
+        );
 
-        if (isExistedBook) {
-            toast.error("the book is already Wish exist");
+        if (isExistedWishList) {
+
+            toast.error("Book already exists in Wish List");
         }
         else {
-            setWishList([...wishList, currentBook]);
-            toast.success(`${currentBook.bookName} is added to Wish list`);
-        }
-        console.log(currentBook, readList, "book");
 
+            addWishListToLocalDB(currentBook);
+
+            setWishList([...wishList, currentBook]);
+
+            toast.success(
+                `${currentBook.bookName} added to Wish List`
+            );
+        }
     };
 
 
+
+    // ================= CONTEXT DATA =================
 
     const data = {
         readList,
         setReadList,
         handleMarkAsRead,
+
         wishList,
         setWishList,
         handleWishList,
-
     };
+
+
 
     return (
         <BookContext.Provider value={data}>
